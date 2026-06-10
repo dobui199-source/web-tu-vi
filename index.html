@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>🔮 Tử Vi AI Chuyên Sâu 🔮</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            text-align: center;
+            padding: 40px 20px;
+            margin: 0;
+        }
+        .form-container {
+            background: white;
+            padding: 30px;
+            max-width: 550px;
+            margin: 0 auto;
+            border-radius: 12px;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        h2 { color: #8e44ad; margin-bottom: 5px; }
+        input, select, button, textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            font-size: 15px;
+        }
+        button {
+            background-color: #8e44ad;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            transition: 0.2s;
+        }
+        button:hover { background-color: #732d91; }
+        label {
+            display: block;
+            text-align: left;
+            font-weight: bold;
+            margin-top: 10px;
+            color: #333;
+        }
+        #ketQuaBox {
+            margin-top: 25px;
+            padding: 25px;
+            background: #faf6ff;
+            border-left: 5px solid #8e44ad;
+            border-radius: 6px;
+            text-align: left;
+            white-space: pre-line; /* Giữ nguyên xuống dòng của AI */
+            display: none; 
+            line-height: 1.7;
+            color: #333;
+            font-size: 15px;
+        }
+        .loading {
+            color: #8e44ad;
+            font-weight: bold;
+            display: none;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="form-container">
+        <h2>🔮 LẬP LÁ SỐ TỬ VI AI 🔮</h2>
+        <p style="color: #666; margin-top: 0;">Luận giải bởi Bậc Thầy Tử Vi & Nhà Tâm Lý Học AI</p>
+        
+        <label style="color: #c0392b;">1. Nhập Gemini API Key của bạn:</label>
+        <input type="password" id="apiKey" placeholder="Dán mã API Key (AIzaSy...) lấy từ Google AI Studio">
+        
+        <hr style="border: 0; border-top: 1px dashed #ccc; margin: 20px 0;">
+
+        <label>2. Thông tin chủ số:</label>
+        <input type="text" id="hoTen" placeholder="Họ và tên của bạn">
+        <input type="date" id="ngaySinh">
+        
+        <select id="gioSinh">
+            <option value="Tý">Giờ Tý (23g - 1g)</option>
+            <option value="Sửu">Giờ Sửu (1g - 3g)</option>
+            <option value="Dần">Giờ Dần (3g - 5g)</option>
+            <option value="Mão">Giờ Mão (5g - 7g)</option>
+            <option value="Thìn">Giờ Thìn (7g - 9g)</option>
+            <option value="Tỵ">Giờ Tỵ (9g - 11g)</option>
+            <option value="Ngọ">Giờ Ngọ (11g - 13g)</option>
+            <option value="Mùi">Giờ Mùi (13g - 15g)</option>
+            <option value="Thân">Giờ Thân (15g - 17g)</option>
+            <option value="Dậu">Giờ Dậu (17g - 19g)</option>
+            <option value="Tuất">Giờ Tuất (19g - 21g)</option>
+            <option value="Hợi">Giờ Hợi (21g - 23g)</option>
+        </select>
+
+        <select id="gioiTinh">
+            <option value="Nam">Nam mạng</option>
+            <option value="Nữ">Nữ mạng</option>
+        </select>
+
+        <label>Câu hỏi cụ thể về Tình duyên, Sự nghiệp, Vận hạn... :</label>
+        <textarea id="cauHoi" rows="3" placeholder="Ví dụ: Định hướng sự nghiệp sắp tới thế nào? Chuyện tình duyên lận đận quá thầy ơi..."></textarea>
+        
+        <button id="btnXem" onclick="goiAI_LuanGiai()">Bắt Đầu Luận Giải Chuyên Sâu</button>
+        
+        <div id="loadingStatus" class="loading">☯️ Thầy đang bấm độn lập lá số và luận giải, xin chờ trong giây lát...</div>
+        <div id="ketQuaBox"></div>
+    </div>
+
+    <script>
+        async function goiAI_LuanGiai() {
+            const apiKey = document.getElementById("apiKey").value.trim();
+            const ten = document.getElementById("hoTen").value.trim();
+            const ngay = document.getElementById("ngaySinh").value;
+            const gio = document.getElementById("gioSinh").value;
+            const gioiTinh = document.getElementById("gioiTinh").value;
+            const cauHoi = document.getElementById("cauHoi").value.trim();
+            
+            if (!apiKey) { alert("Bạn ơi, hãy nhập API Key để kích hoạt AI nhé!"); return; }
+            if (!ten || !ngay) { alert("Vui lòng điền đầy đủ Họ tên và Ngày sinh!"); return; }
+
+            // Bật trạng thái loading
+            document.getElementById("loadingStatus").style.display = "block";
+            document.getElementById("ketQuaBox").style.display = "none";
+            document.getElementById("btnXem").disabled = true;
+
+            // ĐÓNG GÓI KHUNG PROMPT MẪU CHUẨN CỦA BẠN
+            const promptYeuCau = `
+Mục đích và Mục tiêu:
+* Đóng vai một bậc thầy tử vi chuyên sâu, am hiểu sâu sắc các trường phái như Tứ Hóa, Nam Phái, Bắc Phái và đã phân tích cả chục nghìn lá số tử vi.
+* Là một nhà tâm lý học hàng đầu và xem tình duyên, sự nghiệp cho rất nhiều người.
+* Cung cấp các bài luận giải chuyên nghiệp, dễ hiểu nhưng cực kỳ chi tiết cho từng ngôi sao trong các cung của lá số.
+* Kết hợp các sao một cách tài năng để đưa ra ý nghĩa tổng quát, phù hợp nhất với hoàn cảnh của chủ số.
+* Phân tích chi tiết vận hạn: đại hạn, tiểu hạn và nguyệt hạn một cách rõ nét hiểu sâu hiểu rõ vấn đề.
+* Thực hiện phân tích kỹ lưỡng các mối quan hệ giữa các cung: xung chiếu, tam chiếu, giáp cung và tác động của Tứ Hóa (Hóa Khoa, Hóa Quyền, Hóa Lộc, Hóa Kỵ).
+
+Quy tắc và Hành vi:
+1) Quy trình Luận giải:
+a) Phân tích từng sao chính tinh rồi đến phụ tinh trong cung một cách tỉ mỉ, không bỏ sót bất kỳ chi tiết nào.
+b) Áp chiếu cung Mệnh vào các cung khác để phân tích bản tính và phản ứng của chủ số đối với các vấn đề trong cuộc sống tại cung đó.
+c) Luận giải chi tiết Phi Hóa (Hóa Khoa, Hóa Quyền, Hóa Lộc, Hóa Kỵ) cho tất cả 12 cung trên lá số.
+d) Luôn giữ thái độ khách quan: Xấu nói xấu, tốt nói tốt, không nói giảm nói tránh để chủ số có cái nhìn chân thực nhất về vận mệnh.
+
+Phong cách và Thái độ:
+* Ngôn ngữ uyên bác, trang trọng nhưng gần gũi và dễ tiếp cận.
+* Thể hiện sự kinh nghiệm và sự thấu đáo của một bậc thầy dành cả đời nghiên cứu.
+* Luôn đảm bảo tính khách quan và trung thực tuyệt đối trong mọi lời luận giải.
+
+---
+THÔNG TIN CHỦ SỐ DO HỆ THỐNG CUNG CẤP:
+- Họ và tên: ${ten}
+- Giới tính: ${gioiTinh}
+- Ngày tháng năm sinh (Dương lịch): ${ngay}
+- Giờ sinh: Giờ ${gio}
+
+CÂU HỎI ĐẶT RA CHO THẦY:
+"${cauHoi ? cauHoi : "Hãy luận giải chi tiết tổng quan bản mệnh, công danh sự nghiệp và tình duyên cho con."}"
+
+Hãy bắt đầu bài luận giải chi tiết theo đúng phong cách và quy trình của bạn.
+`;
+
+            try {
+                // Gọi API tới mô hình Gemini 1.5 Flash (chạy siêu nhanh và miễn phí ổn định)
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+                
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: promptYeuCau }] }]
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.candidates && data.candidates[0].content.parts[0].text) {
+                    let textPhanHoi = data.candidates[0].content.parts[0].text;
+                    
+                    // Xử lý hiển thị các ký tự in đậm từ Markdown sang HTML cho đẹp
+                    textPhanHoi = textPhanHoi.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                    textPhanHoi = textPhanHoi.replace(/\*(.*?)\*/g, '<em>$1</em>');
+                    
+                    document.getElementById("ketQuaBox").innerHTML = textPhanHoi;
+                    document.getElementById("ketQuaBox").style.display = "block";
+                } else {
+                    document.getElementById("ketQuaBox").innerHTML = "⚠️ Có lỗi xảy ra. Hãy chắc chắn rằng API Key của bạn chính xác và tài khoản đã được kích hoạt.";
+                    document.getElementById("ketQuaBox").style.display = "block";
+                }
+
+            } catch (error) {
+                console.error(error);
+                document.getElementById("ketQuaBox").innerHTML = "❌ Lỗi kết nối hệ thống: " + error.message;
+                document.getElementById("ketQuaBox").style.display = "block";
+            } finally {
+                // Tắt trạng thái chờ, mở lại nút bấm
+                document.getElementById("loadingStatus").style.display = "none";
+                document.getElementById("btnXem").disabled = false;
+            }
+        }
+    </script>
+
+</body>
+</html>
