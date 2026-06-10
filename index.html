@@ -164,7 +164,7 @@ Hãy bắt đầu bài luận giải chi tiết theo đúng phong cách và quy 
 
             try {
                 // Gọi API tới mô hình Gemini 1.5 Flash (chạy siêu nhanh và miễn phí ổn định)
-             const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
                 
                 const response = await fetch(url, {
                     method: "POST",
